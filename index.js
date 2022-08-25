@@ -18,6 +18,8 @@ app.use(
 
 //Routes
 app.use("/api", require("./routes/auth.route"));
+app.use("/api", require("./routes/sumber.route"));
+app.use("/api", require("./routes/pemasukan.route"));
 
 app.listen({ port: 2100 }, async () => {
   console.log("Server up on http://localhost:2100");
