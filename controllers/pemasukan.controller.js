@@ -52,7 +52,7 @@ const pemasukanCtrl = {
         response: {
           data: response,
         },
-        message: "Pemasukan berhasil dibuat.",
+        message: "Data pemasukan berhasil diambil.",
         error: null,
       });
     } catch (err) {
@@ -85,9 +85,7 @@ const pemasukanCtrl = {
 
       return res.status(200).json({
         status: true,
-        response: {
-          data: { ...pemasukan.dataValues, jumlah: jumlah },
-        },
+        response: null,
         message: "Pemasukan berhasil diubah.",
         error: null,
       });
