@@ -1,12 +1,16 @@
-const { Jurnal } = require("../models");
+const { Jurnal, Akun } = require("../models");
 
 const jurnalCtrl = {
   postJurnal: async (req, res) => {
     try {
-      const { nama_akun, tipe, waktu, keterangan, nominal } = req.body;
+      const { akun, tipe, waktu, keterangan, nominal } = req.body;
+
+      const akun_data = await Akun.findOne({ where: { uuid: akun } });
+
+      console.log(akun_data);
 
       const response = await Jurnal.create({
-        nama_akun,
+        id_akun: akun_data.id,
         tipe,
         waktu,
         keterangan,
@@ -72,7 +76,10 @@ const jurnalCtrl = {
     try {
       const param = req.params;
 
-      const response = await Jurnal.findAll({ where: { waktu: param.waktu } });
+      const response = await Jurnal.findAll({
+        include: "akun",
+        where: { waktu: param.waktu },
+      });
 
       if (!response) {
         return res.status(400).json({

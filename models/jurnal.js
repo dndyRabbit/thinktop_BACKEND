@@ -7,8 +7,12 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+    static associate({ Akun }) {
       // define association here
+      this.belongsTo(Akun, { foreignKey: "id_akun", as: "akun" });
+    }
+    toJSON() {
+      return { ...this.get(), id: undefined, id_akun: undefined };
     }
   }
   Jurnal.init(
@@ -16,14 +20,6 @@ module.exports = (sequelize, DataTypes) => {
       uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
-      },
-      nama_akun: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: { msg: "Nama akun harus ada." },
-          notEmpty: { msg: "Nama akun tidak boleh kosong." },
-        },
       },
       nominal: {
         type: DataTypes.INTEGER,
@@ -46,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       waktu: {
         type: DataTypes.DATE,
+        allowNull: false,
+      },
+      id_akun: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
     },

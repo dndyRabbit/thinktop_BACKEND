@@ -1,4 +1,4 @@
-const { Jurnal } = require("../models");
+const { Jurnal, Akun } = require("../models");
 const { Op } = require("sequelize");
 
 const bukuBesarCtrl = {
@@ -9,9 +9,13 @@ const bukuBesarCtrl = {
       const from = new Date(param.year, 0, 01);
       const to = new Date(param.year, 11, 31);
 
+      const akun_data = await Akun.findOne({
+        where: { uuid: param.uuid_akun },
+      });
+
       const response = await Jurnal.findAll({
         where: {
-          nama_akun: param.nama_akun,
+          id_akun: akun_data.id,
           waktu: {
             [Op.between]: [from, to],
           },
@@ -71,9 +75,13 @@ const bukuBesarCtrl = {
       const fromDate = new Date(year, month, 01);
       const toDate = new Date(year, month, 31);
 
+      const akun_data = await Akun.findOne({
+        where: { uuid: param.uuid_akun },
+      });
+
       const response = await Jurnal.findAll({
         where: {
-          nama_akun: param.nama_akun,
+          id_akun: akun_data.id,
           waktu: {
             [Op.between]: [fromDate, toDate],
           },

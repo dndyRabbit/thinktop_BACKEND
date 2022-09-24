@@ -12,10 +12,6 @@ module.exports = {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      nama_akun: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
       nominal: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -30,6 +26,10 @@ module.exports = {
       },
       waktu: {
         type: DataTypes.DATE,
+        allowNull: false,
+      },
+      id_akun: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       createdAt: {
