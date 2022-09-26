@@ -20,6 +20,7 @@
     "nodemon": "^2.0.19",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",
+    "regexpattern-collection": "^1.0.1",
     "sequelize": "^6.21.3"
   }
 }

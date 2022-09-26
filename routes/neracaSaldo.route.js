@@ -1,16 +1,16 @@
 const router = require("express").Router();
-const bukuBesarCtrl = require("../controllers/bukuBesar.controller");
+const neracaSaldoCtrl = require("../controllers/neracaSaldo.controller");
 const authMiddleware = require("../middleware/auth.middleware");
 
 router.get(
-  "/buku_besar/:uuid_akun/:year",
+  "/neraca_saldo/:year",
   authMiddleware.isLoggedIn,
-  bukuBesarCtrl.getAkunData
+  neracaSaldoCtrl.getNeracaSaldoDate
 );
 router.get(
-  "/detail_buku_besar/:uuid_akun/:waktu",
+  "/detail_neraca_saldo/:waktu",
   authMiddleware.isLoggedIn,
-  bukuBesarCtrl.getAkunDataByDate
+  neracaSaldoCtrl.getDetailNeracaSaldo
 );
 
 module.exports = router;

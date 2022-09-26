@@ -9,16 +9,6 @@ const authCtrl = {
 
       const passwordHash = await bcryptjs.hash(password, 12);
 
-      const user = await User.findOne({ where: { email } });
-
-      if (user)
-        return res.status(400).json({
-          status: false,
-          response: null,
-          message: "Email sudah terdaftar.",
-          error: null,
-        });
-
       const response = await User.create({
         name,
         email,
@@ -80,6 +70,7 @@ const authCtrl = {
       return res.status(500).send(err);
     }
   },
+
   reset_password: async (req, res) => {
     try {
       const { email, new_password, old_password } = req.body;
@@ -152,7 +143,7 @@ const authCtrl = {
               error: null,
             });
 
-          const response = await User.findOne(result.uuid);
+          const response = await User.findOne({ where: { uuid: result.id } });
 
           if (!response)
             return res.status(400).json({
@@ -162,7 +153,7 @@ const authCtrl = {
               error: null,
             });
 
-          const access_token = createAccessToken({ id: result.uuid });
+          const access_token = createAccessToken({ id: result.id });
 
           res.status(200).json({
             status: true,
@@ -170,7 +161,7 @@ const authCtrl = {
               data: response,
               access_token,
             },
-            message: "Mohon melakukan login kembali.",
+            message: "Berhasil.",
             error: null,
           });
         }
