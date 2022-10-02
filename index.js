@@ -18,12 +18,10 @@ app.use(
 
 //Routes
 app.use("/api", require("./routes/auth.route"));
-app.use("/api", require("./routes/sumber.route"));
-app.use("/api", require("./routes/pemasukan.route"));
 app.use("/api", require("./routes/akun.route"));
-app.use("/api", require("./routes/jurnal.route"));
-app.use("/api", require("./routes/bukuBesar.route"));
-app.use("/api", require("./routes/neracaSaldo.route"));
+app.use("/api", require("./routes/pembelian.route"));
+app.use("/api", require("./routes/product.route"));
+app.use("/api", require("./routes/laporan.route"));
 
 app.listen({ port: 2100 }, async () => {
   console.log("Server up on http://localhost:2100");

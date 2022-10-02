@@ -5,14 +5,15 @@ const jwt = require("jsonwebtoken");
 const authCtrl = {
   register: async (req, res) => {
     try {
-      const { name, email, password } = req.body;
+      const { full_name, email, password, role } = req.body;
 
       const passwordHash = await bcryptjs.hash(password, 12);
 
       const response = await User.create({
-        name,
+        full_name,
         email,
         password: passwordHash,
+        role,
       });
 
       return res.status(200).json({
@@ -27,6 +28,7 @@ const authCtrl = {
       return res.status(500).send(err);
     }
   },
+
   login: async (req, res) => {
     try {
       const { email, password } = req.body;

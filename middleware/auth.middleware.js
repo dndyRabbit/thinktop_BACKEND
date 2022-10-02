@@ -4,7 +4,11 @@ const jwt = require("jsonwebtoken");
 const { RegexPattern, RegexValidation } =
   require("regexpattern-collection").default;
 
-const { getUserByToken, getAdminByToken } = require("../helper/auth");
+const {
+  getUserByToken,
+  getAdminByToken,
+  getEmployeeByToken,
+} = require("../helper/auth");
 
 const loginValidator = async (req, res, next) => {
   const { email, password } = req.body;
@@ -39,12 +43,13 @@ const loginValidator = async (req, res, next) => {
 };
 
 const registerValidator = async (req, res, next) => {
-  const { email, password, name } = req.body;
+  const { email, password, full_name, role } = req.body;
 
   let err = {
-    name: null,
+    full_name: null,
     email: null,
     password: null,
+    role: null,
   };
   let status = true;
 
@@ -53,9 +58,14 @@ const registerValidator = async (req, res, next) => {
     err.email = "Email tidak valid";
   }
 
-  if (name == undefined || name.trim() == "") {
+  if (full_name == undefined || full_name.trim() == "") {
     status = false;
-    err.name = "Nama tidak boleh kosong";
+    err.full_name = "Nama tidak boleh kosong";
+  }
+
+  if (role == undefined || role == 0) {
+    status = false;
+    err.role = "Role tidak boleh kosong";
   }
 
   if (!RegexValidation.hasMatch(password, RegexPattern.passwordModerate)) {
@@ -127,9 +137,29 @@ const isAdminLoggedIn = async (req, res, next) => {
   }
 };
 
+const isEmployeeLoggedIn = async (req, res, next) => {
+  try {
+    const user = await getEmployeeByToken(req);
+    if (user.status == undefined) {
+      req.body.user = user;
+      next();
+    } else {
+      return res.status(400).json(user);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Authorization Error",
+      data: null,
+      err: error,
+    });
+  }
+};
+
 module.exports = {
   loginValidator,
   registerValidator,
   isLoggedIn,
   isAdminLoggedIn,
+  isEmployeeLoggedIn,
 };

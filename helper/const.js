@@ -1,6 +1,6 @@
 module.exports = {
   ROLE: {
-    USER: 1,
+    EMPLOYEE: 1,
     ADMIN: 2,
   },
 };

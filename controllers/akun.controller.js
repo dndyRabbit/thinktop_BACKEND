@@ -23,6 +23,7 @@ const akunCtrl = {
       return res.status(200).json({
         status: true,
         response: {
+          head: ["No", "Nama", "Waktu", "Aksi"],
           data: response,
         },
         message: "Akun berhasil dibuat.",

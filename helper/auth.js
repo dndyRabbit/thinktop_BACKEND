@@ -18,12 +18,9 @@ exports.getUserByToken = async (req) => {
     token = token.split(" ")[1];
 
     const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    console.log(user);
 
     if (user) {
       const userData = await User.findOne({ where: { uuid: user.id } });
-
-      console.log(userData, "ADAS");
 
       return userData;
     } else {
@@ -47,7 +44,6 @@ exports.getUserByToken = async (req) => {
 exports.getAdminByToken = async (req) => {
   try {
     let token = req.header("Authorization");
-    console.log(token);
     if (token == null || token == undefined) {
       return {
         status: false,
@@ -63,17 +59,19 @@ exports.getAdminByToken = async (req) => {
 
     if (user) {
       const userData = await User.findOne({
-        email: user.email,
-        role: _const.ROLE.ADMIN,
-      }).lean();
+        where: {
+          uuid: user.id,
+          role: _const.ROLE.ADMIN,
+        },
+      });
       if (userData) {
         return userData;
       } else {
         return {
           status: false,
-          message: "User data not found",
+          message: "User data not found.",
           data: null,
-          err: "Anda bukan admin",
+          err: "Anda bukan admin.",
         };
       }
     } else {
@@ -85,7 +83,57 @@ exports.getAdminByToken = async (req) => {
       };
     }
   } catch (err) {
-    console.log(err);
+    return {
+      status: false,
+      message: "Unknown error",
+      data: null,
+      err: err.stack,
+    };
+  }
+};
+
+exports.getEmployeeByToken = async (req) => {
+  try {
+    let token = req.header("Authorization");
+    if (token == null || token == undefined) {
+      return {
+        status: false,
+        message: "Authorzation token not found",
+        data: null,
+        err: null,
+      };
+    }
+
+    token = token.split(" ")[1];
+
+    const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+    if (user) {
+      const userData = await User.findOne({
+        where: {
+          uuid: user.id,
+          role: _const.ROLE.EMPLOYEE,
+        },
+      });
+      if (userData) {
+        return userData;
+      } else {
+        return {
+          status: false,
+          message: "User data not found.",
+          data: null,
+          err: "Anda bukan pegawai.",
+        };
+      }
+    } else {
+      return {
+        status: false,
+        message: "User data not found",
+        data: null,
+        err: "Anda bukan admin",
+      };
+    }
+  } catch (err) {
     return {
       status: false,
       message: "Unknown error",
