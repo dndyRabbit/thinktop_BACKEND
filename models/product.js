@@ -1,48 +1,45 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
+  class Product extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+    static associate({ Pembelian }) {
       // define association here
+      this.hasMany(Pembelian, { foreignKey: "id_product", as: "pembelian" });
     }
-
     toJSON() {
-      return { ...this.get(), id: undefined };
+      return { ...this.get(), id: undefined, id_akun: undefined };
     }
   }
-  User.init(
+
+  Product.init(
     {
       uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      full_name: {
+      product_name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      email: {
+      description: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      role: {
+      price: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
     },
     {
       sequelize,
-      tableName: "users",
-      modelName: "User",
+      tableName: "products",
+      modelName: "Product",
     }
   );
-  return User;
+  return Product;
 };

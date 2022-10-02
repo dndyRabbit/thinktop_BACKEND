@@ -1,7 +1,7 @@
 "use strict";
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable("users", {
+    await queryInterface.createTable("pembelians", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,19 +12,27 @@ module.exports = {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      full_name: {
+      tipe: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+          notNull: { msg: "Nama akun harus ada." },
+          notEmpty: { msg: "Nama akun tidak boleh kosong." },
+        },
       },
-      email: {
-        type: DataTypes.STRING,
+      waktu: {
+        type: DataTypes.DATE,
         allowNull: false,
       },
-      password: {
-        type: DataTypes.STRING,
+      id_akun: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
-      role: {
+      id_product: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      quantity: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
@@ -39,6 +47,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable("users");
+    await queryInterface.dropTable("pembelians");
   },
 };
