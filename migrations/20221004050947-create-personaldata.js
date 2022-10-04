@@ -1,7 +1,7 @@
 "use strict";
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable("users", {
+    await queryInterface.createTable("personaldatas", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,24 +12,23 @@ module.exports = {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      full_name: {
+      nickname: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
-      email: {
+      address: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
-      password: {
+      handphone: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
-      role: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+      gender: {
+        type: DataTypes.STRING,
       },
-      id_personaldata: {
-        type: DataTypes.INTEGER,
+      occupation: {
+        type: DataTypes.STRING,
+      },
+      birthday: {
+        type: DataTypes.DATE,
       },
       createdAt: {
         allowNull: false,
@@ -42,6 +41,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable("users");
+    await queryInterface.dropTable("personaldatas");
   },
 };

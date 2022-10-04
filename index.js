@@ -22,6 +22,7 @@ app.use("/api", require("./routes/akun.route"));
 app.use("/api", require("./routes/pembelian.route"));
 app.use("/api", require("./routes/product.route"));
 app.use("/api", require("./routes/laporan.route"));
+app.use("/api", require("./routes/karyawan.route"));
 
 app.listen({ port: 2100 }, async () => {
   console.log("Server up on http://localhost:2100");
