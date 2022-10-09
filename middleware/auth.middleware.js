@@ -121,6 +121,7 @@ const isLoggedIn = async (req, res, next) => {
 const isAdminLoggedIn = async (req, res, next) => {
   try {
     const user = await getAdminByToken(req);
+
     if (user.status == undefined) {
       req.body.user = user;
       next();

@@ -98,6 +98,7 @@ const akunCtrl = {
   deleteAkun: async (req, res) => {
     try {
       const param = req.params;
+      console.log(param);
 
       const akun = await Akun.findOne({
         where: {
