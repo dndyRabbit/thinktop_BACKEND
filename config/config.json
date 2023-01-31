@@ -1,8 +1,8 @@
 {
   "development": {
-    "username": "dendyhaidar",
-    "password": "root",
-    "database": "thinktopDB",
+    "username": "yanuardi",
+    "password": "",
+    "database": "thinktopdb",
     "host": "127.0.0.1",
     "dialect": "postgres"
   },
