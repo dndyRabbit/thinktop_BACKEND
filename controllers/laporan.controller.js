@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Pembelian, Akun, Product } = require("../models");
+const { Pembelian, Akun, Product, Biaya } = require("../models");
 
 const laporanCtrl = {
   getLaporanHarianWaktu: async (req, res) => {
@@ -98,8 +98,7 @@ const laporanCtrl = {
 
       const from = new Date(param.year, 0, 01);
       const to = new Date(param.year, 11, 31);
-
-      console.log(from);
+      
       const response = await Pembelian.findAll({
         where: {
           waktu: {
@@ -257,7 +256,6 @@ const laporanCtrl = {
   getLaporanTahunanData: async (req, res) => {
     try {
       const param = req.params;
-
       const year = new Date(param.waktu).getFullYear();
 
       const fromDate = new Date(year, 01, 01);
@@ -304,6 +302,70 @@ const laporanCtrl = {
       });
     } catch (err) {
       return res.status(500).send(err);
+    }
+  },
+  getLaporanLabaRugi: async (req, res) => {
+    try {
+      const param = req.query;
+      const from = new Date(param.awal);
+      const to = new Date(param.akhir);
+
+      const response = await Akun.findAll({
+        include: [
+          {
+            model: Biaya,
+            as: 'biaya',
+            required: false,
+            where: {
+              updatedAt: {
+                [Op.between]: [from, to]
+              }
+            }
+          },
+          {
+            model: Pembelian,
+            as: 'pembelian',
+            required: false,
+            where: {
+              waktu: {
+                [Op.between]: [from, to]
+              }
+            },
+            include: [
+              {
+                model: Product,
+                required: true,
+                as: 'product'
+              }
+            ]
+          }
+        ],
+        where: {
+          [Op.or]: [
+            {
+              kategori: 'revenue'
+            },
+            {
+              kategori: 'operational_expense'
+            },
+            {
+              kategori: 'cost_of_sales'
+            },
+          ],
+        }
+      });
+
+      return res.status(200).json({
+        status: true,
+        response: {
+          data: response
+        },
+        message: "Data jurnal berhasil diambil.",
+        error: null,
+      });
+    } catch (errors) {
+      console.log(errors, "ERRORS??");
+      return res.status(500).send(errors);
     }
   },
 };

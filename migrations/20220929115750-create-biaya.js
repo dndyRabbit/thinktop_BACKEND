@@ -1,7 +1,7 @@
 "use strict";
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable("akuns", {
+    await queryInterface.createTable("biayas", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,22 +12,17 @@ module.exports = {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      nama_akun: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      kode_akun: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      kategori: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      saldo: {
+      id_akun: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-        defaultValue: 0
+        allowNull: false,
+      },
+      deskripsi: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      jumlah: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -40,6 +35,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable("akuns");
+    await queryInterface.dropTable("biayas");
   },
 };

@@ -37,4 +37,10 @@ router.get(
   laporanCtrl.getLaporanTahunanData
 );
 
+router.get(
+  "/laporan-laba/",
+  authMiddleware.isLoggedIn,
+  laporanCtrl.getLaporanLabaRugi
+);
+
 module.exports = router;

@@ -3,7 +3,7 @@ const { Akun } = require("../models");
 const akunCtrl = {
   postAkun: async (req, res) => {
     try {
-      const { nama_akun, kode_akun } = req.body;
+      const { nama_akun, kode_akun, kategori } = req.body;
       const akun = await Akun.findOne({ where: { kode_akun } });
 
       if (akun) {
@@ -18,6 +18,7 @@ const akunCtrl = {
       const response = await Akun.create({
         nama_akun,
         kode_akun,
+        kategori
       });
 
       return res.status(200).json({
