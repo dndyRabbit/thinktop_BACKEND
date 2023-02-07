@@ -4,6 +4,7 @@ const ejs = require("ejs");
 let pdf = require("html-pdf");
 let path = require("path");
 const { Pembelian, Akun, Product, Biaya } = require("../models");
+const globalHelper = require("../helper/globalHelper");
 
 const laporanCtrl = {
   getLaporanHarianWaktu: async (req, res) => {
@@ -444,28 +445,63 @@ const laporanCtrl = {
       );
       const to = moment(new Date(tahun ?? years, month, date));
 
-      let dataPembelian = await Pembelian.findAll({
-        include: ["akun", "product"],
-        where: {
-          updatedAt: {
-            [Op.between]: [from, to],
+      const response = await Akun.findAll({
+        include: [
+          {
+            model: Biaya,
+            as: "biaya",
+            required: false,
+            where: {
+              updatedAt: {
+                [Op.between]: [from, to],
+              },
+            },
           },
-        }
+          {
+            model: Pembelian,
+            as: "pembelian",
+            required: false,
+            where: {
+              waktu: {
+                [Op.between]: [from, to],
+              },
+            },
+            include: [
+              {
+                model: Product,
+                required: true,
+                as: "product",
+              },
+            ],
+          },
+        ]
       });
 
-      let dataBiaya = await Biaya.findAll({
-        include: ["akun"],
-        where: {
-          updatedAt: {
-            [Op.between]: [from, to],
-          },
-        },
-      });
+      // let dataPembelian = await Pembelian.findAll({
+      //   include: ["akun", "product"],
+      //   where: {
+      //     updatedAt: {
+      //       [Op.between]: [from, to],
+      //     },
+      //   },
+      //   limit: 50,
+      // });
+
+      // let dataBiaya = await Biaya.findAll({
+      //   include: ["akun"],
+      //   where: {
+      //     updatedAt: {
+      //       [Op.between]: [from, to],
+      //     },
+      //   },
+      //   limit: 50,
+      // });
 
       return res.status(200).json({
         status: true,
         response: {
-          data: [...dataPembelian, ...dataBiaya],
+          data: [],
+          akun: response
         },
         message: "Data Pembelian berhasil diambil.",
         error: null,
@@ -494,7 +530,7 @@ const laporanCtrl = {
           updatedAt: {
             [Op.between]: [from, to],
           },
-        }
+        },
       });
 
       let dataBiaya = await Biaya.findAll({
@@ -505,19 +541,13 @@ const laporanCtrl = {
           },
         },
       });
-      // const data = res.render('laporan', {
-      //   dataTable: [...dataPembelian, ...dataBiaya],
-      //   periode: `${moment(new Date(from)).format('MMMM YYYY')}`,
-      //   print_date: moment(new Date()).format('DD, MMMM YYYY')
-      // });
-      // console.log(data, "DATA RENDER???");
 
       ejs.renderFile(
         path.join(__dirname, "../views/laporan.ejs"),
         {
           dataTable: [...dataPembelian, ...dataBiaya],
-          periode: `${moment(new Date(from)).format('MMMM YYYY')}`,
-          print_date: moment(new Date()).format('DD, MMMM YYYY')
+          periode: `${moment(new Date(from)).format("MMMM YYYY")}`,
+          print_date: moment(new Date()).format("DD, MMMM YYYY"),
         },
         (err, data) => {
           if (err) return res.send(err);
@@ -541,16 +571,246 @@ const laporanCtrl = {
               "Content-type": "application/pdf",
             },
             type: "pdf",
-            timeout: 100000
+            timeout: 100000,
           };
           pdf.create(data, options).toStream((err, pdfStream) => {
             if (err) {
               return res.sendStatus(500);
             }
             req.files = pdfStream;
-            pdf
-              .create(data)
-              .toStream((err, pdfStream) => {
+            pdf.create(data).toStream((err, pdfStream) => {
+              if (err) {
+                return res.sendStatus(500);
+              }
+              res.statusCode = 200;
+              pdfStream.on("end", () => {
+                return res.end();
+              });
+              pdfStream.pipe(res);
+            });
+          });
+        }
+      );
+    } catch (errors) {}
+  },
+  labaRugi: async (req, res) => {
+    try {
+      const { bulan = null, tahun = null } = req.query;
+      const nowDate = moment(new Date()).format("YYYY-MM-DD");
+      const years = moment(nowDate).year();
+      const month = moment(nowDate).month();
+      const date = moment(nowDate).date();
+      const from = moment(
+        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01")
+      );
+      const to = moment(new Date(tahun ?? years, month, date));
+
+      const response = await Akun.findAll({
+        include: [
+          {
+            model: Biaya,
+            as: "biaya",
+            required: false,
+            where: {
+              updatedAt: {
+                [Op.between]: [from, to],
+              },
+            },
+          },
+          {
+            model: Pembelian,
+            as: "pembelian",
+            required: false,
+            where: {
+              waktu: {
+                [Op.between]: [from, to],
+              },
+            },
+            include: [
+              {
+                model: Product,
+                required: true,
+                as: "product",
+              },
+            ],
+          },
+        ],
+        where: {
+          [Op.or]: [
+            {
+              kategori: "revenue",
+            },
+            {
+              kategori: "operational_expense",
+            },
+            {
+              kategori: "cost_of_sales",
+            },
+          ],
+        },
+      });
+
+      return res.status(200).json({
+        status: true,
+        response: {
+          data: response,
+        },
+        message: "Data jurnal berhasil diambil.",
+        error: null,
+      });
+    } catch (errors) {
+      res.status(500).send(errors);
+    }
+  },
+  printLaporanLaba: async (req, res) => {
+    try {
+      const { bulan = null, tahun = null, print = "N" } = req.query;
+
+      const nowDate = moment(new Date()).format("YYYY-MM-DD");
+      const years = moment(nowDate).year();
+      const month = moment(nowDate).month();
+      const date = moment(nowDate).date();
+
+      const from = moment(
+        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01")
+      );
+      const to = moment(new Date(tahun ?? years, month, date));
+
+      const response = await Akun.findAll({
+        include: [
+          {
+            model: Biaya,
+            as: "biaya",
+            required: false,
+            where: {
+              updatedAt: {
+                [Op.between]: [from, to],
+              },
+            },
+          },
+          {
+            model: Pembelian,
+            as: "pembelian",
+            required: false,
+            where: {
+              waktu: {
+                [Op.between]: [from, to],
+              },
+            },
+            include: [
+              {
+                model: Product,
+                required: true,
+                as: "product",
+              },
+            ],
+          },
+        ],
+        where: {
+          [Op.or]: [
+            {
+              kategori: "revenue",
+            },
+            {
+              kategori: "operational_expense",
+            },
+            {
+              kategori: "cost_of_sales",
+            },
+          ],
+        },
+      });
+
+      // OLAH DATA.
+      let _dataStringify = JSON.stringify(response);
+      let _dataParse = JSON.parse(_dataStringify);
+
+      let laba = {
+        revenue: {
+          data: [],
+          total: 0,
+        },
+        expense: {
+          total: 0,
+          data: [],
+        },
+        cos: {
+          total: 0,
+          data: [],
+        },
+      };
+
+      _dataParse.forEach((value) => {
+        if (value.kategori === "revenue") {
+          value.pembelian.forEach((pembeli) => {
+            const { price } = pembeli.product;
+            laba.revenue.total = laba.revenue.total + price * pembeli.quantity;
+            value.saldo = value.saldo + price * pembeli.quantity;
+          });
+          if (value.pembelian.length > 0) laba.revenue.data.push(value);
+        } else if (value.kategori === "operational_expense") {
+          value.biaya.forEach((biayas) => {
+            laba.expense.total = laba.expense.total + biayas.jumlah;
+            value.saldo = value.saldo + biayas.jumlah;
+          });
+          if (value.biaya.length > 0) laba.expense.data.push(value);
+        } else if (value.kategori === "cost_of_sales") {
+          value.biaya.forEach((biayas) => {
+            laba.cos.total = laba.cos.total + biayas.jumlah;
+            value.saldo = value.saldo + biayas.jumlah;
+          });
+          if (value.biaya.length > 0) laba.cos.data.push(value);
+        }
+      });
+
+      if (print == "N") {
+        return res.status(200).json({
+          status: true,
+          response: {
+            data: laba,
+          },
+          message: "Data laba rugi berhasil diambil.",
+          error: null,
+        });
+      } else if (print == "Y") {
+        ejs.renderFile(
+          path.join(__dirname, "../views/laba-rugi.ejs"),
+          {
+            data: laba,
+            periode: `${moment(new Date(from)).format("MMMM YYYY")}`,
+            print_date: moment(new Date()).format("DD, MMMM YYYY"),
+            helper: globalHelper,
+          },
+          (err, data) => {
+            if (err) return res.send(err);
+            const base = path.resolve("public").replace(/\\/g, "/"); //
+            let options = {
+              base: "file:///" + base + "/",
+              localUrlAccess: true,
+              format: "A4",
+              top: "0.4in", // default is 0, units: mm, cm, in, px
+              right: "1.43in",
+              bottom: "0.4in",
+              left: "0.43in",
+              quality: "10000",
+              header: {
+                height: "25mm",
+              },
+              footer: {
+                height: "25mm",
+              },
+              httpHeaders: {
+                "Content-type": "application/pdf",
+              },
+              type: "pdf",
+              timeout: 100000,
+            };
+            pdf.create(data, options).toStream((err, pdfStream) => {
+              if (err) {
+                return res.sendStatus(500);
+              }
+              req.files = pdfStream;
+              pdf.create(data).toStream((err, pdfStream) => {
                 if (err) {
                   return res.sendStatus(500);
                 }
@@ -560,13 +820,14 @@ const laporanCtrl = {
                 });
                 pdfStream.pipe(res);
               });
-          });
-        }
-      );
+            });
+          }
+        );
+      }
     } catch (errors) {
-
+      res.status(500).send(errors);
     }
-  }
+  },
 };
 
 module.exports = laporanCtrl;

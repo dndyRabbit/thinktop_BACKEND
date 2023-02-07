@@ -60,4 +60,10 @@ router.get(
   laporanCtrl.printLaporan
 );
 
+router.get(
+  "/laporan/laba-rugi",
+  authMiddleware.isLoggedIn,
+  laporanCtrl.printLaporanLaba
+)
+
 module.exports = router;

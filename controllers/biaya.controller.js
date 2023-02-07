@@ -27,7 +27,9 @@ const biayaCtrl = {
   },
   getBiaya: async (req, res) => {
     try {
-      const response = await Biaya.findAll();
+      const response = await Biaya.findAll({
+        include: "akun"
+      });
       return res.status(200).json({
         status: true,
         response: {
