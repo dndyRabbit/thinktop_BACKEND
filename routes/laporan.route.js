@@ -55,4 +55,9 @@ router.get(
   laporanCtrl.getLaporan
 );
 
+router.get(
+  "/laporan/print",
+  laporanCtrl.printLaporan
+);
+
 module.exports = router;

@@ -1,6 +1,8 @@
 const moment = require("moment");
 const { Op } = require("sequelize");
-const sequelize = require("sequelize");
+const ejs = require("ejs");
+let pdf = require("html-pdf");
+let path = require("path");
 const { Pembelian, Akun, Product, Biaya } = require("../models");
 
 const laporanCtrl = {
@@ -472,6 +474,99 @@ const laporanCtrl = {
       return res.status(500).send(errors);
     }
   },
+  printLaporan: async (req, res) => {
+    try {
+      const { bulan = null, tahun = null } = req.query;
+
+      const nowDate = moment(new Date()).format("YYYY-MM-DD");
+      const years = moment(nowDate).year();
+      const month = moment(nowDate).month();
+      const date = moment(nowDate).date();
+
+      const from = moment(
+        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01")
+      );
+      const to = moment(new Date(tahun ?? years, month, date));
+
+      let dataPembelian = await Pembelian.findAll({
+        include: ["akun", "product"],
+        where: {
+          updatedAt: {
+            [Op.between]: [from, to],
+          },
+        }
+      });
+
+      let dataBiaya = await Biaya.findAll({
+        include: ["akun"],
+        where: {
+          updatedAt: {
+            [Op.between]: [from, to],
+          },
+        },
+      });
+      // const data = res.render('laporan', {
+      //   dataTable: [...dataPembelian, ...dataBiaya],
+      //   periode: `${moment(new Date(from)).format('MMMM YYYY')}`,
+      //   print_date: moment(new Date()).format('DD, MMMM YYYY')
+      // });
+      // console.log(data, "DATA RENDER???");
+
+      ejs.renderFile(
+        path.join(__dirname, "../views/laporan.ejs"),
+        {
+          dataTable: [...dataPembelian, ...dataBiaya],
+          periode: `${moment(new Date(from)).format('MMMM YYYY')}`,
+          print_date: moment(new Date()).format('DD, MMMM YYYY')
+        },
+        (err, data) => {
+          if (err) return res.send(err);
+          const base = path.resolve("public").replace(/\\/g, "/"); //
+          let options = {
+            base: "file:///" + base + "/",
+            localUrlAccess: true,
+            format: "A4",
+            top: "0.4in", // default is 0, units: mm, cm, in, px
+            right: "1.43in",
+            bottom: "0.4in",
+            left: "0.43in",
+            quality: "10000",
+            header: {
+              height: "25mm",
+            },
+            footer: {
+              height: "25mm",
+            },
+            httpHeaders: {
+              "Content-type": "application/pdf",
+            },
+            type: "pdf",
+            timeout: 100000
+          };
+          pdf.create(data, options).toStream((err, pdfStream) => {
+            if (err) {
+              return res.sendStatus(500);
+            }
+            req.files = pdfStream;
+            pdf
+              .create(data)
+              .toStream((err, pdfStream) => {
+                if (err) {
+                  return res.sendStatus(500);
+                }
+                res.statusCode = 200;
+                pdfStream.on("end", () => {
+                  return res.end();
+                });
+                pdfStream.pipe(res);
+              });
+          });
+        }
+      );
+    } catch (errors) {
+
+    }
+  }
 };
 
 module.exports = laporanCtrl;
