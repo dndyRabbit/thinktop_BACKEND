@@ -43,4 +43,16 @@ router.get(
   laporanCtrl.getLaporanLabaRugi
 );
 
+router.get(
+  "/summary-dashboard",
+  authMiddleware.isLoggedIn,
+  laporanCtrl.getSummaryDashboard
+);
+
+router.get(
+  "/laporan",
+  authMiddleware.isLoggedIn,
+  laporanCtrl.getLaporan
+);
+
 module.exports = router;

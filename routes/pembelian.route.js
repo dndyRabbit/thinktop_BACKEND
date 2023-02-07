@@ -8,4 +8,16 @@ router.post(
   pembelianCtrl.postPembelian
 );
 
+router.get(
+  "/pembelian",
+  authMiddleware.isLoggedIn,
+  pembelianCtrl.getPembelian
+);
+
+router.put(
+  "/pembelian/:uuid_pembelian",
+  authMiddleware.isLoggedIn,
+  pembelianCtrl.putPembelian
+)
+
 module.exports = router;

@@ -12,7 +12,7 @@ const {
 
 const loginValidator = async (req, res, next) => {
   const { email, password } = req.body;
-
+  console.log(email, password, "EMAIL PASSWRD");
   let err = {
     email: null,
     password: null,

@@ -10,15 +10,31 @@ const biayaCtrl = {
       const response = await Biaya.create({
         id_akun: akun_data.id,
         deskripsi,
-        jumlah
+        jumlah,
       });
 
       return res.status(200).json({
         status: true,
         response: {
-          data: response
+          data: response,
         },
         message: "Biaya berhasil dibuat.",
+        error: null,
+      });
+    } catch (err) {
+      return res.status(500).send(err);
+    }
+  },
+  getBiaya: async (req, res) => {
+    try {
+      const response = await Biaya.findAll();
+      return res.status(200).json({
+        status: true,
+        response: {
+          data: response,
+          head: ["No", "Deskripsi", "Jumlah", "Aksi"],
+        },
+        message: "Data biaya berhasil diambil.",
         error: null,
       });
     } catch (err) {
