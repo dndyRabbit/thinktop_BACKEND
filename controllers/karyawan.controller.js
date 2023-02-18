@@ -127,27 +127,36 @@ const karyawanCtrl = {
     try {
       const param = req.params;
 
+      const user = await User.findOne({
+        where: {
+          uuid: param.uuid_karyawan
+        }
+      });
+
+      console.log(user, "DATA USERS");
+
       const product = await Personaldata.findOne({
         where: {
-          uuid: param.uuid_product,
+          id: user.id_personaldata,
         },
       });
 
-      if (!product) {
+      if (!product || !user) {
         return res.status(400).json({
           status: false,
           response: null,
-          message: "Data product tidak ada.",
+          message: "Data akun tidak ada.",
           error: null,
         });
       }
 
+      await user.destroy();
       await product.destroy();
 
       return res.status(200).json({
         status: true,
         response: null,
-        message: "Product berhasil dihapus.",
+        message: "Karyawan berhasil dihapus.",
         error: null,
       });
     } catch (err) {

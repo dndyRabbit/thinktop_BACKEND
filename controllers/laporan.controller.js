@@ -373,9 +373,9 @@ const laporanCtrl = {
       const nowDate = moment(new Date()).format("YYYY-MM-DD");
       const years = moment(nowDate).year();
       const month = moment(nowDate).month();
-      const date = moment(nowDate).date();
-      const from = moment(new Date(years, month, "01"));
-      const to = moment(new Date(years, month, date));
+      const date = moment(nowDate).date() + 1;
+      const from = moment(new Date(years, month, "01", "00", "00"));
+      const to = moment(new Date(years, month, date, "23", "59"));
 
       const dataBiaya = await Biaya.findAll({
         where: {
@@ -441,72 +441,40 @@ const laporanCtrl = {
       const month = moment(nowDate).month();
       const date = moment(nowDate).date();
       const from = moment(
-        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01")
+        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01", "00", "00")
       );
-      const to = moment(new Date(tahun ?? years, month, date));
+      const to = moment(new Date(tahun ?? years, month, date, "23", "59"));
 
-      const response = await Akun.findAll({
-        include: [
-          {
-            model: Biaya,
-            as: "biaya",
-            required: false,
-            where: {
-              updatedAt: {
-                [Op.between]: [from, to],
-              },
-            },
+      let dataPembelian = await Pembelian.findAll({
+        include: ["akun", "product"],
+        where: {
+          updatedAt: {
+            [Op.between]: [from, to],
           },
-          {
-            model: Pembelian,
-            as: "pembelian",
-            required: false,
-            where: {
-              waktu: {
-                [Op.between]: [from, to],
-              },
-            },
-            include: [
-              {
-                model: Product,
-                required: true,
-                as: "product",
-              },
-            ],
-          },
-        ]
+        },
       });
 
-      // let dataPembelian = await Pembelian.findAll({
-      //   include: ["akun", "product"],
-      //   where: {
-      //     updatedAt: {
-      //       [Op.between]: [from, to],
-      //     },
-      //   },
-      //   limit: 50,
-      // });
-
-      // let dataBiaya = await Biaya.findAll({
-      //   include: ["akun"],
-      //   where: {
-      //     updatedAt: {
-      //       [Op.between]: [from, to],
-      //     },
-      //   },
-      //   limit: 50,
-      // });
+      let dataBiaya = await Biaya.findAll({
+        include: ["akun"],
+        where: {
+          updatedAt: {
+            [Op.between]: [from, to],
+          },
+        },
+      });
 
       return res.status(200).json({
         status: true,
         response: {
-          data: [],
-          akun: response
+          data: [...dataPembelian, ...dataBiaya],
+          // data: [],
+          // akun: response
         },
         message: "Data Pembelian berhasil diambil.",
         error: null,
       });
     } catch (errors) {
+      console.log(errors, "ERRORS????");
       return res.status(500).send(errors);
     }
   },
@@ -520,9 +488,9 @@ const laporanCtrl = {
       const date = moment(nowDate).date();
 
       const from = moment(
-        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01")
+        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01", "00", "00")
       );
-      const to = moment(new Date(tahun ?? years, month, date));
+      const to = moment(new Date(tahun ?? years, month, date, "23", "59"));
 
       let dataPembelian = await Pembelian.findAll({
         include: ["akun", "product"],
@@ -672,9 +640,9 @@ const laporanCtrl = {
       const date = moment(nowDate).date();
 
       const from = moment(
-        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01")
+        new Date(tahun ?? years, bulan == "" ? 0 : bulan, "01", "00", "00")
       );
-      const to = moment(new Date(tahun ?? years, month, date));
+      const to = moment(new Date(tahun ?? years, month, date, "23", "59"));
 
       const response = await Akun.findAll({
         include: [
@@ -788,17 +756,18 @@ const laporanCtrl = {
               base: "file:///" + base + "/",
               localUrlAccess: true,
               format: "A4",
+              orientation: "landscape",
               top: "0.4in", // default is 0, units: mm, cm, in, px
               right: "1.43in",
               bottom: "0.4in",
               left: "0.43in",
               quality: "10000",
-              header: {
-                height: "25mm",
-              },
-              footer: {
-                height: "25mm",
-              },
+              // header: {
+              //   height: "25mm",
+              // },
+              // footer: {
+              //   height: "25mm",
+              // },
               httpHeaders: {
                 "Content-type": "application/pdf",
               },
